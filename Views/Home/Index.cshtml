@@ -1,0 +1,49 @@
+﻿@{
+    ViewData["Title"] = "Список стран";
+}
+
+
+@using NonFactors.Mvc.Grid;
+@model IQueryable<MyItemCity> 
+
+<div class="text-left">
+
+    @{
+        //    MyItemCity x = new MyItemCity();
+        //    x.Capital
+        //    x.countryName
+         int count = Model.Count();
+    }
+    
+
+    @(
+        Html
+                .Grid(Model)
+                .Build
+                    (columns =>
+                        {
+                            columns.Add(model => model.countryName).Titled("Название страны").Sortable(true);
+                            columns.Add(model => model.Capital).Titled("Название столицы").Sortable(!false);
+                            columns.Add(model => model.Index)
+                                .RenderedAs(model => $"<a href='/Home/Details/{model.Index}'> Открыть </a>").Encoded(false);
+                            
+                            
+                        }
+                 ).Using(GridFilterMode.Header)
+
+                .Pageable
+                 (pager =>
+                  {
+                        pager.PageSizes = new Dictionary<Int32, String> { { 15, "х15" }, { 5, "х5" }, { 10, "x10" } };
+                        pager.ShowPageSizes = true;
+                        pager.PagesToDisplay = 3;
+                        pager.CurrentPage =1 ;
+                        pager.RowsPerPage = 15;
+                 }
+                ).Filterable().Sortable()
+                .Empty("Данных нет")
+        )
+    Загружено @count стран.<br />
+
+</div>
+

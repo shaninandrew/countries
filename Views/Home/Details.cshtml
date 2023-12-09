@@ -1,0 +1,122 @@
+﻿@model MyItemCity
+@using System.Reflection
+@using countries;
+@using countries.data;
+
+
+@{
+    ViewData["Title"] = "Детали по стране";
+
+    //Глобальная переменная
+    CountryItem item = null;
+
+    //список валют
+    List<string> list_of_currencies = new List<string>();
+
+    //список языков
+    List<string> list_of_langs = new List<string>();
+
+}
+<h1>@ViewData["Title"]</h1>
+
+@if (Model == null)
+{
+    <div>
+        Данных нет.
+    </div>
+
+}
+
+@if (Model!=null)
+{
+    string id = "";
+    string capital = "";
+    string country = "";
+    
+    string typex = Model.GetType().Name;
+
+    if (typex == "MyItemCity")
+    {
+        id          = Model.Index;
+        capital     = Model.Capital;
+        country     = Model.countryName;
+        
+        GetDatails FullInfoItem = new GetDatails(country);
+        
+
+       item=FullInfoItem.GetCountry;
+
+        //Используем рефлексию для вывода вложенных  значений свойст объекта 
+        Type test_curr = item.currencies.GetType();
+        Currencies this_curr = item.currencies;
+
+        //Свйоства объекта валют
+        var props = this_curr.GetType().GetProperties().Where(ixx=>ixx!=null);
+        
+        foreach (var item_field in props)
+        {
+            //var i = this_curr.GetType().GetField(item_field.);// GetValue(item.currencies);
+
+            var i = item_field.GetValue(this_curr);
+
+            if (i != null)
+            {
+
+                Type t = i.GetType();
+                string value = t.GetProperty("name").GetValue(i).ToString();
+                list_of_currencies.Add(value);
+
+            }
+
+
+        }
+
+        //***** Проще
+
+        //Используем рефлексию для вывода вложенных значений свойст объекта
+        Type test_lang = item.languages.GetType();
+        Languages this_lang = item.languages;
+
+        //Свйоства объекта языков
+        var props_langs = this_lang.GetType().GetRuntimeProperties();  //.Where(i=>i.GetValue(this_lang)!=null); // getGetProperties(); //.Where(ixx => ixx != null);
+
+        var langs = this_lang.GetType().GetProperties().Where(l => l.GetValue(this_lang) != null);
+        foreach (var l in langs)
+        {
+
+            //Type t = l.GetType();
+            var value = l.Name; //t.GetProperty("Name").GetValue(l);
+            if (value == null) continue;
+            list_of_langs.Add((string)  value);
+        }
+
+
+
+    }
+
+    <h2>  @country</h2>
+    <div>
+        @if (item!=null)
+      {
+          <div> <img src="@item.flags.png" /> </div>
+          <div> <b>Столица:</b> @item.capital.FirstOrDefault().ToString()  - @capital </div>
+          <div> Регион: @item.region </div>
+          <div> Площадь: @item.area  km <sup>2</sup>  </div>
+          <div> Валюты: @foreach (string cur_name in list_of_currencies){ <ul> @cur_name </ul>} </div>
+
+            <div> <b> Языки: </b> 
+                @foreach (string cur_name in list_of_langs)
+                {
+                    <ul> @cur_name </ul>
+                } </div>
+      }
+    </div>
+
+    
+
+}
+
+
+
+
+
